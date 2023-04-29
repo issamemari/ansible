@@ -5,7 +5,7 @@
     - name: Update apt cache
       shell: apt-get update
     - name: Install packages
-      shell: apt-get install -y unzip python3-pip htop curl git
+      shell: apt-get install -y unzip htop curl
     - name: Install AWS CLI
       shell: |
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -15,3 +15,20 @@
       pip:
         name: pipenv
         state: latest
+    - name: Decrypt GitHub SSH key
+      ansible.builtin.command: "ansible-vault decrypt ../secrets/github/*"
+      args:
+        chdir: "{{ playbook_dir }}"
+    - name: Setup SSH key
+      shell: |
+        eval "$(ssh-agent -s)"
+        ssh-add ../secrets/github/id_ed25519
+    - name: Decrypt AWS credentials
+      ansible.builtin.command: "ansible-vault decrypt ../secrets/aws/*"
+      args:
+        chdir: "{{ playbook_dir }}"
+    - name: Configure AWS CLI
+      shell: |
+        aws configure set aws_access_key_id "{{ lookup('file', '../secrets/aws/access_key_id') }}"
+        aws configure set aws_secret_access_key "{{ lookup('file', '../secrets/aws/secret_access_key') }}"
+        aws configure set default.region eu-west-1
