@@ -27,3 +27,7 @@
         aws configure set aws_access_key_id "{{ lookup('file', '../secrets/aws/access_key_id') }}"
         aws configure set aws_secret_access_key "{{ lookup('file', '../secrets/aws/secret_access_key') }}"
         aws configure set default.region eu-west-1
+    - name: Configure git
+      shell: |
+        git config --global user.email issa.memari@gmail.com
+        git config --global user.name "Issa Memari"
